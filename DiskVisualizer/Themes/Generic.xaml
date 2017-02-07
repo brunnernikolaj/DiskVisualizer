@@ -1,0 +1,124 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:local="clr-namespace:DiskVisualizer">
+
+
+
+
+    <Style TargetType="{x:Type local:DiskView}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:DiskView}">
+                    <Grid>
+                        <ListBox ItemsSource="{Binding Drives}" x:Name="ItemContainer" Margin="0" ItemsPanel="{DynamicResource DiskViewItemPanel}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonUp">
+                                    <i:InvokeCommandAction Command="{Binding MouseCommand}" CommandParameter="{RelativeSource Self}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid >
+                                        <Border Margin="0,0,0,20"  VerticalAlignment="Stretch" Background="{Binding BackgroundColor}" HorizontalAlignment="Stretch">
+
+                                            <TextBlock Text="{Binding Name}" Margin="0" FontSize="22" FontFamily="ClearType" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        </Border>
+                                        <TextBlock Text="{Binding SizeText}" VerticalAlignment="Bottom" HorizontalAlignment="Center"></TextBlock>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                
+                                    <Setter Property="Background" Value="{Binding BackgroundColor}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border BorderBrush="{TemplateBinding BorderBrush}" Height="250" Width="150" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" >
+
+                                                    <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.Resources>
+                                <ItemsPanelTemplate x:Key="DiskViewItemPanel">
+                                    <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.Resources>
+                        </ListBox>
+                        <Grid x:Name="DriveView" Visibility="Visible">
+
+                            <Border VerticalAlignment="Stretch" Background="{Binding Model.Background}" HorizontalAlignment="Left" Width="200" Margin="15,15,0,15">
+                                <Grid>
+                                    <TextBlock Text="{Binding Model.DriveName}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Foreground="White" FontFamily="ClearType" FontWeight="Bold"/>
+                                    <TextBlock Text="SCAN NOW" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="24" Foreground="White" Margin="0,0,0,15" FontWeight="Bold"></TextBlock>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="{Binding Model.DriveName,StringFormat={}{0} Drive}" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="230,15,0,0"/>
+                            <Border Background="{Binding Model.Background}" Height="30" Width="150"  CornerRadius="5"  VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="15,0,0,15">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger SourceName="DriveView" EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction Command="{Binding ScanDrive}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+    <Style TargetType="{x:Type local:TreeMap}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:TreeMap}">
+                    <Grid>
+                        <TextBox Margin="5,2,0,5" HorizontalAlignment="Stretch"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}" Background="Transparent" BorderBrush="Transparent"></TextBox>
+                        <ListBox ItemsSource="{Binding Items}" x:Name="ItemContainer" Margin="0,20,0,0" ItemsPanel="{DynamicResource TreeMapItemPanel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                             BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Background" Value="{Binding Background}"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="{Binding Margin}"/>
+                                    <Setter Property="VerticalAlignment" Value="Top"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border Width="{Binding Width}" Height="{Binding Height}" BorderThickness="2"  VerticalAlignment="Top" BorderBrush="{TemplateBinding BorderBrush}"  Background="{TemplateBinding Background}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" >
+                                                    <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Text}" x:Name="TextFisk" HorizontalAlignment="Center" FontFamily="ClearType" FontWeight="Light" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.Resources>
+                                <ItemsPanelTemplate x:Key="TreeMapItemPanel">
+                                    <Grid IsItemsHost="True" />
+                                </ItemsPanelTemplate>
+                            </ListBox.Resources>
+                        </ListBox>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
