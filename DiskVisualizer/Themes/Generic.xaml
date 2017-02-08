@@ -4,67 +4,116 @@
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:local="clr-namespace:DiskVisualizer">
 
+    <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
+    <local:InvertedBoolToVisConverter x:Key="invertedBoolToVisConverter" />
+    <Style x:Key="ButtonBorder" TargetType="Border">
+        <Style.Resources>
+            <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+        </Style.Resources>
+        <Setter Property="Border.Background" Value="{Binding Background}"/>
+        <Style.Triggers>
+            <Trigger Property="Border.IsMouseOver" Value="True">
+                <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
-
+    <Style x:Key="ScanNowButtonBorder" TargetType="Border">
+        <Style.Resources>
+            <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+        </Style.Resources>
+        <Setter Property="Border.Background" Value="{Binding Model.Background}"/>
+        <Style.Triggers>
+            <Trigger Property="Border.IsMouseOver" Value="True">
+                <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <Style x:Key="ButtonBorderNoBinding" TargetType="Border">
+        <Style.Resources>
+            <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+        </Style.Resources>
+        <Setter Property="Border.Background" Value="#80CBC4"/>
+        <Style.Triggers>
+            <Trigger Property="Border.IsMouseOver" Value="True">
+                <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <Style TargetType="{x:Type local:DiskView}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:DiskView}">
                     <Grid>
-                        <ListBox ItemsSource="{Binding Drives}" x:Name="ItemContainer" Margin="0" ItemsPanel="{DynamicResource DiskViewItemPanel}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="MouseLeftButtonUp">
-                                    <i:InvokeCommandAction Command="{Binding MouseCommand}" CommandParameter="{RelativeSource Self}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid >
-                                        <Border Margin="0,0,0,20"  VerticalAlignment="Stretch" Background="{Binding BackgroundColor}" HorizontalAlignment="Stretch">
-
-                                            <TextBlock Text="{Binding Name}" Margin="0" FontSize="22" FontFamily="ClearType" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock Text="{Binding SizeText}" VerticalAlignment="Bottom" HorizontalAlignment="Center"></TextBlock>
-                                    </Grid>
-
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                
-                                    <Setter Property="Background" Value="{Binding BackgroundColor}"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Border BorderBrush="{TemplateBinding BorderBrush}" Height="250" Width="150" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" >
-
-                                                    <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.Resources>
-                                <ItemsPanelTemplate x:Key="DiskViewItemPanel">
-                                    <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListBox.Resources>
-                        </ListBox>
-                        <Grid x:Name="DriveView" Visibility="Visible">
-
-                            <Border VerticalAlignment="Stretch" Background="{Binding Model.Background}" HorizontalAlignment="Left" Width="200" Margin="15,15,0,15">
-                                <Grid>
-                                    <TextBlock Text="{Binding Model.DriveName}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Foreground="White" FontFamily="ClearType" FontWeight="Bold"/>
-                                    <TextBlock Text="SCAN NOW" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="24" Foreground="White" Margin="0,0,0,15" FontWeight="Bold"></TextBlock>
-                                </Grid>
-                            </Border>
-                            <TextBlock Text="{Binding Model.DriveName,StringFormat={}{0} Drive}" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="230,15,0,0"/>
-                            <Border Background="{Binding Model.Background}" Height="30" Width="150"  CornerRadius="5"  VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="15,0,0,15">
+                        <Grid HorizontalAlignment="Center" x:Name="StartView" VerticalAlignment="Center">
+                            <TextBlock FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top" Text="Storage Devices" FontWeight="Medium"></TextBlock>
+                            <ListBox ItemsSource="{Binding Drives}" x:Name="ItemContainer" Margin="0,50,0,0" ItemsPanel="{DynamicResource DiskViewItemPanel}"  BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
                                 <i:Interaction.Triggers>
-                                    <i:EventTrigger SourceName="DriveView" EventName="MouseLeftButtonUp">
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction Command="{Binding MouseCommand}" CommandParameter="{RelativeSource Self}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid >
+                                            <Border Style="{StaticResource ButtonBorder}" Margin="0,0,0,20"  VerticalAlignment="Stretch" BorderThickness="2"  HorizontalAlignment="Stretch">
+                                                <TextBlock Text="{Binding Name}" Margin="0" FontSize="22" FontFamily="ClearType" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="{Binding SizeText}" VerticalAlignment="Bottom" HorizontalAlignment="Center"></TextBlock>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="{Binding Background}"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border Cursor="Hand" BorderBrush="{TemplateBinding BorderBrush}" Height="300" Width="200" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" >
+                                                        <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.Resources>
+                                    <ItemsPanelTemplate x:Key="DiskViewItemPanel">
+                                        <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.Resources>
+                            </ListBox>
+                        </Grid>
+
+                        <Grid x:Name="DriveView" Background="Transparent" Visibility="Hidden" Margin="0,25,0,0">
+                            <Border Style="{StaticResource ScanNowButtonBorder}" VerticalAlignment="Bottom" Cursor="Hand" HorizontalAlignment="Center" Width="300" Margin="0,0,5,15" Height="60" Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource boolToVisibilityConverter}}" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction Command="{Binding BackCommand}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="10,0,10,0" Text="Back"></TextBlock>
+                            </Border>
+                            <Border Style="{StaticResource ScanNowButtonBorder}" x:Name="ScanButton" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15,15,15,15" Width="{Binding Model.Width}" Height="{Binding Model.Height}">
+                                <Grid >
+                                    <Grid Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource boolToVisibilityConverter}}">
+                                        <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                            <TextBlock Text="{Binding Model.DriveName}"  TextAlignment="Center" FontSize="22" Foreground="White" FontFamily="ClearType" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Model.SizeText}"  TextAlignment="Center" FontSize="14" Foreground="White" FontFamily="ClearType" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="SCAN NOW" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="0,0,0,15" FontWeight="Bold"></TextBlock>
+                                    </Grid>
+                                    <Grid Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource invertedBoolToVisConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Model.Progress}" x:Name="ProgressText" Foreground="White" FontSize="24" FontWeight="Medium" TextAlignment="Center"></TextBlock>
+                                    </Grid>
+                                </Grid>
+
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
                                         <i:InvokeCommandAction Command="{Binding ScanDrive}" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
@@ -74,6 +123,9 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Resources>
+            
+        </Style.Resources>
     </Style>
 
 
@@ -83,8 +135,17 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TreeMap}">
                     <Grid>
-                        <TextBox Margin="5,2,0,5" HorizontalAlignment="Stretch"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}" Background="Transparent" BorderBrush="Transparent"></TextBox>
-                        <ListBox ItemsSource="{Binding Items}" x:Name="ItemContainer" Margin="0,20,0,0" ItemsPanel="{DynamicResource TreeMapItemPanel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                        <TextBlock Margin="5,2,0,5" HorizontalAlignment="Left" FontSize="18"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}"></TextBlock>
+                        <Border />
+                        <Border Style="{StaticResource ButtonBorderNoBinding}" VerticalAlignment="Top" Cursor="Hand" HorizontalAlignment="Right" Margin="0,0,5,0" Height="30" >
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonUp">
+                                    <i:InvokeCommandAction Command="{Binding BackButtonClicked}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="New Drive"></TextBlock>
+                        </Border>
+                        <ListBox ItemsSource="{Binding Items}" x:Name="ItemContainer" Margin="0,30,0,0" ItemsPanel="{DynamicResource TreeMapItemPanel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
                              BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
                             <ListBox.ItemContainerStyle>
@@ -97,9 +158,17 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
-                                                <Border Width="{Binding Width}" Height="{Binding Height}" BorderThickness="2"  VerticalAlignment="Top" BorderBrush="{TemplateBinding BorderBrush}"  Background="{TemplateBinding Background}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" >
+                                                <Border Cursor="Hand" Width="{Binding Width}" Height="{Binding Height}" ToolTip="{Binding ToolTip}" BorderThickness="2"  VerticalAlignment="Top" BorderBrush="{TemplateBinding BorderBrush}"  Background="{TemplateBinding Background}" >
                                                     <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
                                                 </Border>
+                                                <ControlTemplate.Resources>
+                                                    <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+                                                </ControlTemplate.Resources>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -107,7 +176,7 @@
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Text}" x:Name="TextFisk" HorizontalAlignment="Center" FontFamily="ClearType" FontWeight="Light" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                    <TextBlock Text="{Binding Text}" HorizontalAlignment="Center" FontFamily="ClearType" FontWeight="Light" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                             <ListBox.Resources>

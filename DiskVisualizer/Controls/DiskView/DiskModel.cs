@@ -15,6 +15,6 @@ namespace DiskVisualizer.StartView
 
         public string SizeText { get; set; }
 
-        public SolidColorBrush BackgroundColor { get; set; }
+        public SolidColorBrush Background { get; set; }
     }
 }

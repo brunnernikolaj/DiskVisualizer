@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FileSystemExplorerWPF;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -9,14 +10,18 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using TreeMapSharp;
 
 namespace DiskVisualizer
 {
     public class TreeMap : Control
     {
         public ObservableCollection<TreemapValueModel> _nodes { get; set; } = new ObservableCollection<TreemapValueModel>();
-        private TreeMapper _mapper = new TreeMapper();
         public TreeMapModel _model { get; set; } = new TreeMapModel();
+        public RelayCommand BackButton { get; set; }
+        public event EventHandler OnBackButtonClicked;
+
+        private TreeMapper _mapper = new TreeMapper();
         private Stack<string> _previousDirectories = new Stack<string>();
         private string _currentDir;
 
@@ -27,16 +32,16 @@ namespace DiskVisualizer
             this.SizeChanged += OnResize;
             this.Loaded += OnLoaded;
             this.MouseRightButtonUp += TreeMap_MouseRightButtonUp;
+            BackButton = new RelayCommand(BackButtonClicked);
 
-            var drive = DriveInfo.GetDrives().Where(x => x.Name == "E:\\").First();
-            _model.CurrentDir = drive.Name;
-            _currentDir = drive.Name;
-            //FileSystemExplorer.ScanDrive(drive.Name, drive.TotalSize);
-            FileSystemExplorer.Instance.DriveAnalyzeDone += DriveAnalyseDone;
 
-            DataContext = new { Items = _nodes,Model = _model };
+            DataContext = new { Items = _nodes, Model = _model, BackButtonClicked = BackButton };
         }
 
+        public void BackButtonClicked(object parameters)
+        {
+            OnBackButtonClicked(this, new EventArgs());
+        }
 
         private void TreeMap_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -70,8 +75,10 @@ namespace DiskVisualizer
             }
         }
 
-        private void DriveAnalyseDone(object sender, FileExplorerDriveAnalyzeDoneEventArgs e)
+        public void SetDirectory(string path)
         {
+            _model.CurrentDir = path;
+            _currentDir = path;
             _nodes.Clear();
             BuildTree(_model.CurrentDir);
         }
@@ -84,7 +91,7 @@ namespace DiskVisualizer
             ColorGenerator colorGeneraor = new ColorGenerator(10);
 
             currentDirValues = currentDirValues.OrderByDescending(x => x.Value).ToList();
-            var data = _mapper.BuildMap(this.ActualWidth, this.ActualHeight, currentDirValues.Select(x => x.Value));
+            var data = _mapper.BuildMap(_listbox.ActualWidth, _listbox.ActualHeight, currentDirValues.Select(x => x.Value));
 
             for (int i = 0; i < data.Count; i++)
             {
@@ -97,6 +104,7 @@ namespace DiskVisualizer
                     continue;
                 }
 
+
                 var newNode = new TreemapValueModel
                 {
                     Height = currentTreemapInfo.Height,
@@ -106,15 +114,20 @@ namespace DiskVisualizer
                     Value = currentTreemapInfo.Value,
                     Path = currentDirInfo.Path,
                     IsDirectory = currentDirInfo.IsDirectory
+
                 };
 
                 var text = $"{currentDirInfo.Name}\n{currentDirInfo.Value.FormatDataSize()}";
 
                 //Only draw text if it fits within the item
                 var textSize = MeasureString(text);
-                if (textSize.Width < currentTreemapInfo.Width && textSize.Height < currentTreemapInfo.Height)
+                if (textSize.Width < currentTreemapInfo.Width && textSize.Height < (currentTreemapInfo.Height / 2))
                 {
                     newNode.Text = text;
+                }
+                else
+                {
+                    newNode.ToolTip = text;
                 }
 
                 _nodes.Add(newNode);
@@ -123,12 +136,10 @@ namespace DiskVisualizer
             var listboxItems = ExtensionMethods.FindVisualChildren<ListBoxItem>(_listbox);
             foreach (var listboxItem in listboxItems)
             {
-                listboxItem.MouseEnter += ListboxItem_MouseEnter;
-                listboxItem.MouseLeave += ListboxItem_MouseLeave;
                 if ((listboxItem.DataContext as TreemapValueModel).IsDirectory)
                 {
                     listboxItem.MouseLeftButtonUp += ListboxItem_MouseLeftButtonUp;
-                }              
+                }
             }
 
             Storyboard sb = AnimateEnter(data);
@@ -149,18 +160,6 @@ namespace DiskVisualizer
                 BuildTree(_model.CurrentDir);
             };
             sb.Begin();
-        }
-
-        private void ListboxItem_MouseLeave(object sender, MouseEventArgs e)
-        {
-            var item = sender as ListBoxItem;
-            item.Background = item.Background.ChangeLightness(1.1f);
-        }
-
-        private void ListboxItem_MouseEnter(object sender, MouseEventArgs e)
-        {
-            var item = sender as ListBoxItem;
-            item.Background = item.Background.ChangeLightness(0.9f);
         }
 
         private Storyboard AnimateEnter(List<RectangleTemp> data)

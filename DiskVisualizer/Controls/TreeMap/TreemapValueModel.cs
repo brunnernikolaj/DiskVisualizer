@@ -14,6 +14,8 @@ namespace DiskVisualizer
     {
         public string Text { get; set; }
 
+        public string ToolTip { get; set; }
+
         public string Path { get; set; }
 
         public double Value { get; set; }

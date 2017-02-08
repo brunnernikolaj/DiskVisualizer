@@ -111,16 +111,7 @@ namespace DiskVisualizer
             return descendingOrder ? source.OrderByDescending(sortBy) : source.OrderBy(sortBy);
         }
 
-        public static IEnumerable<KeyValuePair<T, Y>> FindFromList<T, Y>(this IEnumerable<KeyValuePair<T, Y>> source, List<string> folderStrings)
-        {
-            foreach (var entry in source)
-            {
-                foreach (var folderString in folderStrings.Where(folderString => folderString.Equals(entry.Key)))
-                {
-                    yield return entry;
-                }
-            }
-        }
+        
 
         public static string FormatDataSize(this long sizeInBytes)
         {
@@ -157,21 +148,6 @@ namespace DiskVisualizer
                 (byte)(color.B * coef)));
         }
 
-        public static List<string> ParentFoldersToList(this string path)
-        {
-            var split = path.Split('\\');
-            var folderlist = new List<string>();
-
-            for (var count = 0; count < split.Length - 2; count++)
-            {
-                var temp = split[0];
-                for (var i = 0; i < split.Length - 2 - count; i++)
-                {
-                    temp += "\\" + split[i + 1];
-                }
-                folderlist.Add(temp);
-            }
-            return folderlist;
-        }
+        
     }
 }

@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace DiskVisualizer
+namespace FileSystemExplorerWPF
 {
     public class FileSystemExplorer
     {
-
-
         public Dictionary<string, FolderInfo> FolderInfoDictionary;
         public event EventHandler<FileExplorerDriveAnalyzeDoneEventArgs> DriveAnalyzeDone;
         public event EventHandler<ProgressUpdatedEventArgs> ProgressUpdated;
