@@ -68,7 +68,7 @@ namespace DiskVisualizer
 
         private void OnResize(object sender, SizeChangedEventArgs e)
         {
-            if (this.IsLoaded)
+            if (this.IsLoaded && this.Visibility == Visibility.Visible)
             {
                 _nodes.Clear();
                 BuildTree(_model.CurrentDir);

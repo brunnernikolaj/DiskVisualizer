@@ -34,6 +34,8 @@ namespace DiskVisualizer
 
         private void DiskView_ScanComplete(object sender, FileExplorerDriveAnalyzeDoneEventArgs e)
         {
+            
+
             DiskView.Visibility = Visibility.Hidden;
             TreeMap.Visibility = Visibility.Visible;
             TreeMap.SetDirectory(e.Drivename);          
@@ -43,6 +45,9 @@ namespace DiskVisualizer
         {
             DiskView.Visibility = Visibility.Visible;
             TreeMap.Visibility = Visibility.Hidden;
+
+
+            DiskView.BackCommand.Execute(null);
         }
     }
 }

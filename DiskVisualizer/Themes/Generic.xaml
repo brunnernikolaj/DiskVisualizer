@@ -6,6 +6,7 @@
 
     <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
     <local:InvertedBoolToVisConverter x:Key="invertedBoolToVisConverter" />
+    <FontFamily x:Key="Gotham">/resources/GOTHAM-LIGHT.TTF</FontFamily>
     <Style x:Key="ButtonBorder" TargetType="Border">
         <Style.Resources>
             <local:DarkenColorConverter x:Key="DarkenColorConverter" />
@@ -48,7 +49,7 @@
                 <ControlTemplate TargetType="{x:Type local:DiskView}">
                     <Grid>
                         <Grid HorizontalAlignment="Center" x:Name="StartView" VerticalAlignment="Center">
-                            <TextBlock FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top" Text="Storage Devices" FontWeight="Medium"></TextBlock>
+                            <TextBlock FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top" Text="Storage Devices" FontFamily="Gotham" ></TextBlock>
                             <ListBox ItemsSource="{Binding Drives}" x:Name="ItemContainer" Margin="0,50,0,0" ItemsPanel="{DynamicResource DiskViewItemPanel}"  BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="MouseLeftButtonUp">
@@ -59,9 +60,9 @@
                                     <DataTemplate>
                                         <Grid >
                                             <Border Style="{StaticResource ButtonBorder}" Margin="0,0,0,20"  VerticalAlignment="Stretch" BorderThickness="2"  HorizontalAlignment="Stretch">
-                                                <TextBlock Text="{Binding Name}" Margin="0" FontSize="22" FontFamily="ClearType" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                <TextBlock Text="{Binding Name}" Margin="0" FontSize="22" FontFamily="Gotham" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
                                             </Border>
-                                            <TextBlock Text="{Binding SizeText}" VerticalAlignment="Bottom" HorizontalAlignment="Center"></TextBlock>
+                                            <TextBlock Text="{Binding SizeText}" VerticalAlignment="Bottom"  HorizontalAlignment="Center"></TextBlock>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -95,20 +96,20 @@
                                         <i:InvokeCommandAction Command="{Binding BackCommand}" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
-                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="10,0,10,0" Text="Back"></TextBlock>
+                                <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="10,0,10,0" Text="Back"></TextBlock>
                             </Border>
                             <Border Style="{StaticResource ScanNowButtonBorder}" x:Name="ScanButton" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15,15,15,15" Width="{Binding Model.Width}" Height="{Binding Model.Height}">
                                 <Grid >
                                     <Grid Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource boolToVisibilityConverter}}">
                                         <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center" >
-                                            <TextBlock Text="{Binding Model.DriveName}"  TextAlignment="Center" FontSize="22" Foreground="White" FontFamily="ClearType" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Model.SizeText}"  TextAlignment="Center" FontSize="14" Foreground="White" FontFamily="ClearType" />
+                                            <TextBlock Text="{Binding Model.DriveName}" FontFamily="Gotham"  TextAlignment="Center" FontSize="22" Foreground="White"  FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Model.SizeText}" FontFamily="Gotham" Margin="0,5,0,0"  TextAlignment="Center" FontSize="14" Foreground="White"  />
                                         </StackPanel>
 
-                                        <TextBlock Text="SCAN NOW" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="0,0,0,15" FontWeight="Bold"></TextBlock>
+                                        <TextBlock Text="SCAN NOW" VerticalAlignment="Bottom" FontFamily="Gotham" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="0,0,0,15" FontWeight="Medium"></TextBlock>
                                     </Grid>
                                     <Grid Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource invertedBoolToVisConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Model.Progress}" x:Name="ProgressText" Foreground="White" FontSize="24" FontWeight="Medium" TextAlignment="Center"></TextBlock>
+                                        <TextBlock Text="{Binding Model.Progress}" x:Name="ProgressText" FontFamily="Gotham" Foreground="White" FontSize="24" TextAlignment="Center"></TextBlock>
                                     </Grid>
                                 </Grid>
 
@@ -135,7 +136,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TreeMap}">
                     <Grid>
-                        <TextBlock Margin="5,2,0,5" HorizontalAlignment="Left" FontSize="18"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}"></TextBlock>
+                        <TextBlock Margin="5,5,0,5" FontFamily="Gotham" HorizontalAlignment="Left" FontSize="18"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}"></TextBlock>
                         <Border />
                         <Border Style="{StaticResource ButtonBorderNoBinding}" VerticalAlignment="Top" Cursor="Hand" HorizontalAlignment="Right" Margin="0,0,5,0" Height="30" >
                             <i:Interaction.Triggers>
@@ -143,7 +144,7 @@
                                     <i:InvokeCommandAction Command="{Binding BackButtonClicked}" />
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
-                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="New Drive"></TextBlock>
+                            <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="New Drive"></TextBlock>
                         </Border>
                         <ListBox ItemsSource="{Binding Items}" x:Name="ItemContainer" Margin="0,30,0,0" ItemsPanel="{DynamicResource TreeMapItemPanel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
@@ -176,7 +177,7 @@
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Text}" HorizontalAlignment="Center" FontFamily="ClearType" FontWeight="Light" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                    <TextBlock FontFamily="Gotham" Text="{Binding Text}" HorizontalAlignment="Center"  Foreground="#212121" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                             <ListBox.Resources>

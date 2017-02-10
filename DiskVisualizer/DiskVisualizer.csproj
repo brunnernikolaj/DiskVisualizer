@@ -122,6 +122,8 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Resource Include="Resources\GOTHAM-BOLD.TTF" />
+    <Resource Include="Resources\GOTHAM-LIGHT.TTF" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -92,8 +92,29 @@ namespace DiskVisualizer
 
         private void BackClicked(object parameters)
         {
-            _driveView.Visibility = Visibility.Hidden;
+            var sb = new Storyboard();
+
+
+            DoubleAnimation driveViewAni = new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromMilliseconds(200), EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            Storyboard.SetTarget(driveViewAni, _driveView);
+            Storyboard.SetTargetProperty(driveViewAni, new PropertyPath(OpacityProperty));
+
+            DoubleAnimation startViewAni = new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromMilliseconds(200), EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            Storyboard.SetTarget(startViewAni, _startView);
+            Storyboard.SetTargetProperty(startViewAni, new PropertyPath(OpacityProperty));
+            startViewAni.BeginTime = driveViewAni.Duration.TimeSpan;
+
+
+            sb.Children.Add(startViewAni);
+            sb.Children.Add(driveViewAni);
+
+            sb.Begin();
+
+            sb.Completed += (obj, evt) => { _driveView.Visibility = Visibility.Hidden; };
+
+            _startView.Opacity = 1.0;
             _startView.Visibility = Visibility.Visible;
+            _driveView.Visibility = Visibility.Hidden;
         }
 
         private void DriveAnalyzeDone(object sender, FileExplorerDriveAnalyzeDoneEventArgs e)
@@ -157,8 +178,30 @@ namespace DiskVisualizer
             _model.SizeText = listBoxItem.SizeText;
             _model.Height = 300;
             _model.Width = 300;
+
+            var sb = new Storyboard();
+
+            
+
+            DoubleAnimation startViewAni = new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromMilliseconds(200), EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            Storyboard.SetTarget(startViewAni, _startView);
+            Storyboard.SetTargetProperty(startViewAni, new PropertyPath(OpacityProperty));
+
+            DoubleAnimation driveViewAni = new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromMilliseconds(200), EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            Storyboard.SetTarget(driveViewAni, _driveView);
+            Storyboard.SetTargetProperty(driveViewAni, new PropertyPath(OpacityProperty));
+            driveViewAni.BeginTime = startViewAni.Duration.TimeSpan;
+
+            sb.Children.Add(startViewAni);
+            sb.Children.Add(driveViewAni);
+
+            sb.Begin();
+            _driveView.Opacity = 0.0;
+
+            sb.Completed += (obj, evt) => { _startView.Visibility = Visibility.Hidden; sb.Remove(); };
+
             _driveView.Visibility = Visibility.Visible;
-            _startView.Visibility = Visibility.Hidden;
+            
         }
 
 
