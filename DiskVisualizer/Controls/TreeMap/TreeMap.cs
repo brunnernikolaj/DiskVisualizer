@@ -18,7 +18,7 @@ namespace DiskVisualizer
     {
         public ObservableCollection<TreemapValueModel> _nodes { get; set; } = new ObservableCollection<TreemapValueModel>();
         public TreeMapModel _model { get; set; } = new TreeMapModel();
-        public RelayCommand BackButton { get; set; }
+
         public event EventHandler OnBackButtonClicked;
 
         private TreeMapper _mapper = new TreeMapper();
@@ -26,21 +26,28 @@ namespace DiskVisualizer
         private string _currentDir;
 
         private ListBox _listbox;
+        private TreeMapFilter _currentFilter;
 
         public TreeMap()
         {
+            _currentFilter = TreeMapFilter.GB;
+
             this.SizeChanged += OnResize;
             this.Loaded += OnLoaded;
             this.MouseRightButtonUp += TreeMap_MouseRightButtonUp;
-            BackButton = new RelayCommand(BackButtonClicked);
+            FileSystemExplorer.Instance.DeleteCompleted += FileSystemExplorer_DeleteCompleted;
+            _model.BackButton = new RelayCommand(BackButtonClicked);
+            _model.DeleteButton = new RelayCommand(DeleteButtonClicked,DeleteButtonCanExecute);
+            _model.ListboxItemLeftButton = new RelayCommand(ListboxItem_MouseLeftButtonUp);
+            _model.SliderValueChanged = new RelayCommand(Slider_ValueChanged);
 
-
-            DataContext = new { Items = _nodes, Model = _model, BackButtonClicked = BackButton };
+            DataContext = new { Items = _nodes, Model = _model};
         }
 
-        public void BackButtonClicked(object parameters)
+        private void FileSystemExplorer_DeleteCompleted(object sender, EventArgs e)
         {
-            OnBackButtonClicked(this, new EventArgs());
+            _nodes.Clear();
+            BuildTree(_currentDir);
         }
 
         private void TreeMap_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -75,6 +82,74 @@ namespace DiskVisualizer
             }
         }
 
+        private void BackButtonClicked(object parameters)
+        {
+            OnBackButtonClicked(this, new EventArgs());
+        }
+
+        private bool DeleteButtonCanExecute(object parameters)
+        {
+            var canExecute = _nodes.Any(x => x.IsSelected);
+            
+            return canExecute; 
+        }
+
+        private void DeleteButtonClicked(object parameters)
+        {
+            foreach (var item in _nodes.Where(x => x.IsSelected))
+            {
+                FileSystemExplorer.Instance.DeleteDirectoryAsync(item.Path);
+            }
+
+           
+        }
+
+        private void Slider_ValueChanged(object parameters)
+        {
+            switch (_model.SliderValue)
+            {
+                case 1:
+                    _currentFilter = TreeMapFilter.GB;
+                    break;
+                case 2:
+                    _currentFilter = TreeMapFilter.MB;
+                    break;
+                case 3:
+                    _currentFilter = TreeMapFilter.KB;
+                    break;
+                default:
+                    break;
+            }
+            _nodes.Clear();
+            BuildTree(_currentDir);
+        }
+
+        private void ListboxItem_MouseLeftButtonUp(object sender)
+        {
+            var item = _listbox.SelectedItem as TreemapValueModel;
+
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                item.IsSelected = !item.IsSelected;
+                _model.IsAItemSelected = _nodes.Any(x => x.IsSelected);
+            }
+            else if (item.IsDirectory)
+            {
+                _previousDirectories.Push(_model.CurrentDir);
+                _model.CurrentDir = item.Path;
+                _currentDir = _model.CurrentDir;
+
+                var sb = AnimateExit();
+                sb.Completed += (obj, evn) =>
+                {
+                    _nodes.Clear();
+                    BuildTree(_model.CurrentDir);
+                };
+                sb.Begin();
+            }
+
+        }
+
         public void SetDirectory(string path)
         {
             _model.CurrentDir = path;
@@ -90,7 +165,11 @@ namespace DiskVisualizer
 
             ColorGenerator colorGeneraor = new ColorGenerator(10);
 
-            currentDirValues = currentDirValues.OrderByDescending(x => x.Value).ToList();
+            currentDirValues = currentDirValues
+                .OrderByDescending(x => x.Value)
+                .Where(x => x.Value < GetFilterSize(_currentFilter))
+                .ToList();
+
             var data = _mapper.BuildMap(_listbox.ActualWidth, _listbox.ActualHeight, currentDirValues.Select(x => x.Value));
 
             for (int i = 0; i < data.Count; i++)
@@ -104,7 +183,6 @@ namespace DiskVisualizer
                     continue;
                 }
 
-
                 var newNode = new TreemapValueModel
                 {
                     Height = currentTreemapInfo.Height,
@@ -114,7 +192,6 @@ namespace DiskVisualizer
                     Value = currentTreemapInfo.Value,
                     Path = currentDirInfo.Path,
                     IsDirectory = currentDirInfo.IsDirectory
-
                 };
 
                 var text = $"{currentDirInfo.Name}\n{currentDirInfo.Value.FormatDataSize()}";
@@ -133,33 +210,33 @@ namespace DiskVisualizer
                 _nodes.Add(newNode);
             }
 
-            var listboxItems = ExtensionMethods.FindVisualChildren<ListBoxItem>(_listbox);
-            foreach (var listboxItem in listboxItems)
-            {
-                if ((listboxItem.DataContext as TreemapValueModel).IsDirectory)
-                {
-                    listboxItem.MouseLeftButtonUp += ListboxItem_MouseLeftButtonUp;
-                }
-            }
-
             Storyboard sb = AnimateEnter(data);
             sb.Begin();
         }
 
-        private void ListboxItem_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void ProcessCurrentDir(string path, List<TreemapValue> list)
         {
-            var item = sender as ListBoxItem;
-            _previousDirectories.Push(_model.CurrentDir);
-            _model.CurrentDir = (item.DataContext as TreemapValueModel).Path;
-            _currentDir = _model.CurrentDir;
-
-            var sb = AnimateExit();
-            sb.Completed += (obj, evn) =>
+            foreach (var directory in Directory.GetDirectories(path))
             {
-                _nodes.Clear();
-                BuildTree(_model.CurrentDir);
-            };
-            sb.Begin();
+                try
+                {
+                    var info = FileSystemExplorer.Instance.FolderInfoDictionary[directory];
+                    if (info != null)
+                    {
+                        list.Add(new TreemapValue { Name = info.name, Path = info.path, Value = info.size, IsDirectory = true });
+                    }
+                    
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            foreach (var file in Directory.GetFiles(path))
+            {
+                var info = new FileInfo(file);
+                list.Add(new TreemapValue { Name = info.Name, Value = info.Length });
+            }
         }
 
         private Storyboard AnimateEnter(List<RectangleTemp> data)
@@ -207,34 +284,28 @@ namespace DiskVisualizer
             }
 
             return sb;
-        }
+        }        
 
-        private static void ProcessCurrentDir(string path, List<TreemapValue> list)
+        private long GetFilterSize(TreeMapFilter filter)
         {
-            foreach (var directory in Directory.GetDirectories(path))
+            switch (filter)
             {
-                try
-                {
-                    var info = FileSystemExplorer.Instance.FolderInfoDictionary[directory];
-                    list.Add(new TreemapValue { Name = info.name, Path = info.path, Value = info.size, IsDirectory = true });
-                }
-                catch (Exception e)
-                {
-
-                }
-            }
-            foreach (var file in Directory.GetFiles(path))
-            {
-                var info = new FileInfo(file);
-                list.Add(new TreemapValue { Name = info.Name, Value = info.Length });
-            }
+                case TreeMapFilter.GB:
+                    return 1073741824L * 1000;
+                case TreeMapFilter.MB:
+                    return 1048576 * 1000;
+                case TreeMapFilter.KB:
+                    return 1024 * 1000;
+                default:
+                    return 1073741824;
+            }   
         }
 
         private Size MeasureString(string Text)
         {
             TextBlock textBlock = new TextBlock();
             textBlock.Text = Text;
-            textBlock.FontWeight = FontWeights.Light;
+            textBlock.FontSize = 12;
             textBlock.FontFamily = new FontFamily("ClearType");
             textBlock.TextAlignment = TextAlignment.Center;
             textBlock.HorizontalAlignment = HorizontalAlignment.Center;
@@ -255,5 +326,10 @@ namespace DiskVisualizer
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeMap), new FrameworkPropertyMetadata(typeof(TreeMap)));
         }
+    }
+
+    enum TreeMapFilter
+    {
+        GB,MB,KB
     }
 }

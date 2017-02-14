@@ -13,6 +13,7 @@ namespace FileSystemExplorerWPF
         public Dictionary<string, FolderInfo> FolderInfoDictionary;
         public event EventHandler<FileExplorerDriveAnalyzeDoneEventArgs> DriveAnalyzeDone;
         public event EventHandler<ProgressUpdatedEventArgs> ProgressUpdated;
+        public event EventHandler DeleteCompleted;
 
         //Used for calculating the progress of scaning a HDD
         private double PercentDone = 0;
@@ -131,6 +132,7 @@ namespace FileSystemExplorerWPF
             var thread = new BackgroundWorker();
             thread.DoWork += (obj, e) => DeleteDirectory(path);
             thread.RunWorkerAsync();
+            thread.RunWorkerCompleted += (obj, e) => { DeleteCompleted(this, e); };
         }
 
         private void DeleteDirectory(string path)
@@ -140,6 +142,8 @@ namespace FileSystemExplorerWPF
             {
                 pair.Value.size -= FolderInfoDictionary[path].size;
             }
+
+            FolderInfoDictionary.Remove(path);
 
             //if (Directory.Exists(path))
             //{

@@ -26,6 +26,8 @@ namespace DiskVisualizer
 
         public bool IsDirectory { get; set; }
 
+        public bool IsSelected { get; set; }
+
         public SolidColorBrush Background { get; set; }
 
         public Thickness Margin { get; set; }

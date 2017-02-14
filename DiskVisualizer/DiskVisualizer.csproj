@@ -69,10 +69,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DarkenColorConverter.cs" />
-    <Compile Include="InvertedBoolToVisConverter.cs" />
+    <Compile Include="CustomSliderControl.cs" />
+    <Compile Include="Utils\DarkenColorConverter.cs" />
+    <Compile Include="Utils\InvertedBoolToVisConverter.cs" />
     <Compile Include="Utils\ColorGenerator.cs" />
-    <Compile Include="Utils\DelegateCommand.cs" />
+    <Compile Include="Utils\RelayCommand.cs" />
     <Compile Include="Controls\DiskView\DiskView.cs" />
     <Compile Include="Controls\DiskView\DriveViewModel.cs" />
     <Compile Include="Controls\DiskView\DiskModel.cs" />

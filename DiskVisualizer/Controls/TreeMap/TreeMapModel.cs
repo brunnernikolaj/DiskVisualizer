@@ -8,16 +8,19 @@ using System.Threading.Tasks;
 
 namespace DiskVisualizer
 {
-    public class TreeMapModel : INotifyPropertyChanged
+    [ImplementPropertyChanged]
+    public class TreeMapModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string CurrentDir { get; set; }
 
-        public void OnPropertyChanged(string propertyName, object before, object after)
-        {
-            //Perform property validation
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public int SliderValue { get; set; }
+
+        public bool IsAItemSelected { get; set; }
+
+        public RelayCommand BackButton { get; set; }
+        public RelayCommand DeleteButton { get; set; }
+        public RelayCommand ListboxItemLeftButton { get; set; }
+        public RelayCommand SliderValueChanged { get; set; }
+        
     }
 }

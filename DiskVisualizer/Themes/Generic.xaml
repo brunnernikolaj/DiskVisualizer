@@ -7,6 +7,7 @@
     <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
     <local:InvertedBoolToVisConverter x:Key="invertedBoolToVisConverter" />
     <FontFamily x:Key="Gotham">/resources/GOTHAM-LIGHT.TTF</FontFamily>
+    <FontFamily x:Key="Gotham-Bold">/resources/GOTHAM-BOLD.TTF</FontFamily>
     <Style x:Key="ButtonBorder" TargetType="Border">
         <Style.Resources>
             <local:DarkenColorConverter x:Key="DarkenColorConverter" />
@@ -36,6 +37,35 @@
             <local:DarkenColorConverter x:Key="DarkenColorConverter" />
         </Style.Resources>
         <Setter Property="Border.Background" Value="#80CBC4"/>
+        <Style.Triggers>
+            <Trigger Property="Border.IsMouseOver" Value="True">
+                <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DeleteButtonStyle" TargetType="Border">
+        <Style.Resources>
+            <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+        </Style.Resources>
+        <Setter Property="Border.Background" Value="#80CBC4"/>
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding RelativeSource={RelativeSource Self},Path=IsMouseOver}" Value="True" />
+                    <Condition Binding="{Binding Path=Model.IsAItemSelected}" Value="true" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
+                <Setter Property="Border.Cursor" Value="Hand"></Setter>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DeleteOverlay" TargetType="Border">
+        <Style.Resources>
+            <local:DarkenColorConverter x:Key="DarkenColorConverter" />
+        </Style.Resources>
+        <Setter Property="Border.Background" Value="#ffcdd2"/>
         <Style.Triggers>
             <Trigger Property="Border.IsMouseOver" Value="True">
                 <Setter Property="Border.Background" Value="{Binding RelativeSource={RelativeSource Self},Mode=OneTime, Path=Background,Converter={StaticResource DarkenColorConverter},ConverterParameter=Background}" />
@@ -98,7 +128,7 @@
                                 </i:Interaction.Triggers>
                                 <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" FontSize="18" Foreground="White" Margin="10,0,10,0" Text="Back"></TextBlock>
                             </Border>
-                            <Border Style="{StaticResource ScanNowButtonBorder}" x:Name="ScanButton" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15,15,15,15" Width="{Binding Model.Width}" Height="{Binding Model.Height}">
+                            <Border Style="{StaticResource ScanNowButtonBorder}" x:Name="ScanButton" Cursor="Hand" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15,15,15,15" Width="{Binding Model.Width}" Height="{Binding Model.Height}">
                                 <Grid >
                                     <Grid Visibility="{Binding Model.ShowScanButtonText, Converter={StaticResource boolToVisibilityConverter}}">
                                         <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center" >
@@ -137,15 +167,32 @@
                 <ControlTemplate TargetType="{x:Type local:TreeMap}">
                     <Grid>
                         <TextBlock Margin="5,5,0,5" FontFamily="Gotham" HorizontalAlignment="Left" FontSize="18"  VerticalAlignment="Top" Text="{Binding Model.CurrentDir}"></TextBlock>
-                        <Border />
-                        <Border Style="{StaticResource ButtonBorderNoBinding}" VerticalAlignment="Top" Cursor="Hand" HorizontalAlignment="Right" Margin="0,0,5,0" Height="30" >
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="MouseLeftButtonUp">
-                                    <i:InvokeCommandAction Command="{Binding BackButtonClicked}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                            <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="New Drive"></TextBlock>
-                        </Border>
+                        <StackPanel  HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                            <local:CustomSliderControl Margin="0,0,15,0" x:Name="slider" Value="{Binding Model.SliderValue, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsSnapToTickEnabled="True" Width="80" SmallChange="1" Maximum="3" Minimum="1">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="ValueChanged">
+                                        <i:InvokeCommandAction Command="{Binding Model.SliderValueChanged}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </local:CustomSliderControl>
+                            <Border Style="{StaticResource DeleteButtonStyle}"  Margin="0,0,5,0" Height="30" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction Command="{Binding Model.DeleteButton}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="Delete"></TextBlock>
+                            </Border>
+                            <Border Style="{StaticResource ButtonBorderNoBinding}" Cursor="Hand" Margin="0,0,5,0" Height="30" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction Command="{Binding Model.BackButton}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <TextBlock VerticalAlignment="Center" FontFamily="Gotham" HorizontalAlignment="Center" Foreground="White" Margin="10,0,10,0" Text="New Drive"></TextBlock>
+                            </Border>
+                        </StackPanel>
+                        
                         <ListBox ItemsSource="{Binding Items}" x:Name="ItemContainer" Margin="0,30,0,0" ItemsPanel="{DynamicResource TreeMapItemPanel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
                              BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black">
@@ -159,9 +206,16 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
-                                                <Border Cursor="Hand" Width="{Binding Width}" Height="{Binding Height}" ToolTip="{Binding ToolTip}" BorderThickness="2"  VerticalAlignment="Top" BorderBrush="{TemplateBinding BorderBrush}"  Background="{TemplateBinding Background}" >
+                                                <Grid>
+                                                    <Border Cursor="Hand" Width="{Binding Width}" Height="{Binding Height}" ToolTip="{Binding ToolTip}" BorderThickness="2"  VerticalAlignment="Top" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" >
+                                                        
+                                                    </Border>
+                                                    <Border Cursor="Hand" Style="{StaticResource DeleteOverlay}" Width="{Binding Width}" Height="{Binding Height}" ToolTip="{Binding ToolTip}" Visibility="{Binding IsSelected,Converter={StaticResource boolToVisibilityConverter}}" BorderThickness="2"  VerticalAlignment="Top">
+            
+                                                    </Border>
                                                     <ContentPresenter x:Name="ContentContainer" ContentTemplate="{TemplateBinding ContentTemplate}"/>
-                                                </Border>
+                                                </Grid>
+                                                
                                                 <ControlTemplate.Resources>
                                                     <local:DarkenColorConverter x:Key="DarkenColorConverter" />
                                                 </ControlTemplate.Resources>
@@ -177,7 +231,7 @@
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock FontFamily="Gotham" Text="{Binding Text}" HorizontalAlignment="Center"  Foreground="#212121" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                    <TextBlock FontFamily="Gotham-Bold" FontSize="12" Text="{Binding Text}" HorizontalAlignment="Center"  Foreground="#212121" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                             <ListBox.Resources>
@@ -185,10 +239,19 @@
                                     <Grid IsItemsHost="True" />
                                 </ItemsPanelTemplate>
                             </ListBox.Resources>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonUp">
+                                    <i:InvokeCommandAction Command="{Binding Model.ListboxItemLeftButton}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </ListBox>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:CustomSliderControl}" BasedOn="{StaticResource {x:Type Slider}}">
+
     </Style>
 </ResourceDictionary>
